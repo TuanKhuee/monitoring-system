@@ -51,3 +51,4 @@ D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.Sw
 D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\BouncyCastle.Cryptography.dll
 D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\MailKit.dll
 D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\MimeKit.dll
+D:\WorkSpace\MonitoringSystem\backend\obj\Debug\net9.0\backend.sourcelink.json
