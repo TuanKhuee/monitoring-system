@@ -25,7 +25,7 @@ public class DashboardController : ControllerBase
         var totalServices = services.Count();
         var activeServicesCount = services.Count(s => s.IsActive);
 
-        // Lấy toàn bộ logs kiểm tra trong 24 giờ qua
+        
         var since24h = DateTime.UtcNow.AddDays(-1);
         var recentLogs = await _monitorLogRepository.FilterByAsync(l => l.CheckedAt >= since24h);
 
@@ -33,7 +33,7 @@ public class DashboardController : ControllerBase
         int onlineCount = 0;
         int offlineCount = 0;
 
-        // Nhóm log mới nhất theo từng Service để tìm trạng thái hiện tại (ONLINE / OFFLINE)
+        
         var latestLogsByService = recentLogs
             .GroupBy(l => l.ServiceId)
             .Select(g => g.OrderByDescending(l => l.CheckedAt).FirstOrDefault())
@@ -48,7 +48,7 @@ public class DashboardController : ControllerBase
             }
         }
 
-        // Tính tỉ lệ Uptime của tất cả services
+        
         if (recentLogs.Any())
         {
             var successChecks = recentLogs.Count(l => l.Status == 1);
