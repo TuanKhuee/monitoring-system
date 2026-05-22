@@ -1748,11 +1748,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\WorkSpace\\MonitoringSystem\\backend\\backend.csproj",
+      "projectUniqueName": "d:\\WorkSpace\\MonitoringSystem\\backend\\backend.csproj",
       "projectName": "backend",
-      "projectPath": "D:\\WorkSpace\\MonitoringSystem\\backend\\backend.csproj",
+      "projectPath": "d:\\WorkSpace\\MonitoringSystem\\backend\\backend.csproj",
       "packagesPath": "C:\\Users\\tuank\\.nuget\\packages\\",
-      "outputPath": "D:\\WorkSpace\\MonitoringSystem\\backend\\obj\\",
+      "outputPath": "d:\\WorkSpace\\MonitoringSystem\\backend\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\tuank\\AppData\\Roaming\\NuGet\\NuGet.Config"
