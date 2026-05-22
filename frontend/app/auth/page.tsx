@@ -1,10 +1,12 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useMonitor } from "../context/MonitorContext";
 import { useRouter } from "next/navigation";
+import ToastAlert from "../components/ToastAlert";
 
 export default function AuthPage() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const {
     token,
     isLogin,
@@ -29,8 +31,22 @@ export default function AuthPage() {
     }
   }, [token, router]);
 
+  const onSubmitAuth = async (e: React.FormEvent) => {
+    setIsLoading(true);
+    await handleAuth(e);
+    setIsLoading(false);
+  };
+
+  const onSubmitOtp = async (e: React.FormEvent) => {
+    setIsLoading(true);
+    await handleVerifyOtp(e);
+    setIsLoading(false);
+  };
+
   return (
     <div className="flex-1 min-h-screen flex items-center justify-center py-12 relative overflow-hidden bg-slate-950">
+      {/* Toast notifications must be rendered here for auth page */}
+      <ToastAlert />
       {/* Background Decorative Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-violet-600/20 rounded-full blur-[120px] pointer-events-none"></div>
@@ -57,7 +73,7 @@ export default function AuthPage() {
         </div>
 
         {isOtpPending ? (
-          <form onSubmit={handleVerifyOtp} className="flex flex-col gap-6">
+          <form onSubmit={onSubmitOtp} className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <input
                 type="text"
@@ -71,9 +87,12 @@ export default function AuthPage() {
             </div>
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white py-4 rounded-2xl text-sm font-bold shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-60 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-sm font-bold shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
             >
-              Xác nhận mã OTP
+              {isLoading ? (
+                <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Đang xác nhận...</>
+              ) : "Xác nhận mã OTP"}
             </button>
             <button
               type="button"
@@ -84,7 +103,7 @@ export default function AuthPage() {
             </button>
           </form>
         ) : (
-          <form onSubmit={handleAuth} className="flex flex-col gap-6">
+          <form onSubmit={onSubmitAuth} className="flex flex-col gap-6">
             {/* Tabs */}
             <div className="flex bg-slate-950/50 p-1.5 rounded-2xl border border-slate-800/80 backdrop-blur-sm">
               <button
@@ -150,9 +169,12 @@ export default function AuthPage() {
             <div className="flex flex-col gap-4 mt-2">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white py-4 rounded-2xl text-sm font-bold shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-60 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-sm font-bold shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
               >
-                {isLogin ? "Truy cập hệ thống" : "Tạo tài khoản mới"}
+                {isLoading ? (
+                  <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Đang xử lý...</>
+                ) : (isLogin ? "Truy cập hệ thống" : "Tạo tài khoản mới")}
               </button>
 
               {!isLogin && (
