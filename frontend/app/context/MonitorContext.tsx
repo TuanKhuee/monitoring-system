@@ -82,7 +82,7 @@ interface MonitorContextProps {
   handleEditProject: (proj: Project) => void;
   handleDeleteProject: (id: string) => Promise<void>;
   handleCreateService: (e: React.FormEvent) => Promise<void>;
-  handleUpdateService: (id: string, updatedService: Service) => Promise<void>;
+  handleUpdateService: (id: string, updatedService: any) => Promise<void>;
   handleDeleteService: (id: string) => Promise<void>;
   // Misc
   handleSaveApiUrl: () => void;
@@ -399,12 +399,22 @@ export const MonitorProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   };
 
-  const handleUpdateService = async (id: string, updatedService: Service) => {
+  const handleUpdateService = async (id: string, updatedService: any) => {
     try {
+      // Only send fields required by UpdateServiceRequest
+      const payload = {
+        serviceName: updatedService.serviceName,
+        ip: updatedService.ip,
+        port: Number(updatedService.port),
+        protocol: updatedService.protocol,
+        healthEndpoint: updatedService.healthEndpoint ?? "/",
+        intervalSeconds: Number(updatedService.intervalSeconds),
+        isActive: updatedService.isActive,
+      };
       const res = await fetch(`${apiUrl}/api/Service/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(updatedService),
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
         showToast("Cập nhật dịch vụ thành công!");
