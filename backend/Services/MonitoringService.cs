@@ -29,6 +29,21 @@ public class MonitoringService: BackgroundService
         _serviceProvider = serviceProvider;
         _logger = logger;
         _httpClient = new HttpClient{ Timeout = TimeSpan.FromSeconds(10)};
+        
+        // Mimic a modern Google Chrome browser on Windows exactly to bypass Vercel/Cloudflare bot protection
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36");
+        _httpClient.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
+        _httpClient.DefaultRequestHeaders.Add("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7");
+        _httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
+        _httpClient.DefaultRequestHeaders.Add("Pragma", "no-cache");
+        _httpClient.DefaultRequestHeaders.Add("sec-ch-ua", "\"Not A(Brand\";v=\"99\", \"Google Chrome\";v=\"121\", \"Chromium\";v=\"121\"");
+        _httpClient.DefaultRequestHeaders.Add("sec-ch-ua-mobile", "?0");
+        _httpClient.DefaultRequestHeaders.Add("sec-ch-ua-platform", "\"Windows\"");
+        _httpClient.DefaultRequestHeaders.Add("sec-fetch-dest", "document");
+        _httpClient.DefaultRequestHeaders.Add("sec-fetch-mode", "navigate");
+        _httpClient.DefaultRequestHeaders.Add("sec-fetch-site", "none");
+        _httpClient.DefaultRequestHeaders.Add("sec-fetch-user", "?1");
+        _httpClient.DefaultRequestHeaders.Add("upgrade-insecure-requests", "1");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -48,13 +63,11 @@ public class MonitoringService: BackgroundService
                 var activeServices = await serviceRepository.FilterByAsync(s => s.IsActive);
                 var now = DateTime.UtcNow;
 
-                // Only check services that are due:
-                //   - Never checked before  → check immediately (first-time)
-                //   - Elapsed time >= service's own IntervalSeconds
+
                 var servicesToCheck = activeServices.Where(s =>
                 {
                     if (string.IsNullOrEmpty(s.Id)) return false;
-                    if (!_lastCheckedAt.TryGetValue(s.Id, out var lastTime)) return true; // never checked → immediate
+                    if (!_lastCheckedAt.TryGetValue(s.Id, out var lastTime)) return true;
                     return (now - lastTime).TotalSeconds >= s.IntervalSeconds;
                 }).ToList();
 
@@ -69,8 +82,6 @@ public class MonitoringService: BackgroundService
             {
                 _logger.LogError(ex, "Error occurred in Monitoring Service execution loop.");
             }
-
-            // Short polling interval: re-scan every 2 seconds to catch newly added services quickly
             await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
         }
         _logger.LogInformation("Background Monitoring Service is stopping.");
@@ -85,9 +96,14 @@ public class MonitoringService: BackgroundService
     {
         if (string.IsNullOrEmpty(service.Id)) return;
 
+        var project = await projectRepository.GetByIdAsync(service.ProjectId);
+        string projectName = project?.Name ?? "Unknown Project";
+
         var log = new MonitorLog
         {
             ServiceId = service.Id,
+            ServiceName = service.ServiceName,
+            ProjectName = projectName,
             CheckedAt = DateTime.UtcNow,  
         };
         
@@ -131,7 +147,13 @@ public class MonitoringService: BackgroundService
             }
             else
             {
-                var url = $"{service.Protocol.ToLower()}://{service.Ip}:{service.Port}{service.HealthEndpoint ?? ""}";
+                var portStr = "";
+                if ((service.Protocol.Equals("Http", StringComparison.OrdinalIgnoreCase) && service.Port != 80) ||
+                    (service.Protocol.Equals("Https", StringComparison.OrdinalIgnoreCase) && service.Port != 443))
+                {
+                    portStr = $":{service.Port}";
+                }
+                var url = $"{service.Protocol.ToLower()}://{service.Ip}{portStr}{service.HealthEndpoint ?? ""}";
                 var response = await _httpClient.GetAsync(url);
                 stopwatch.Stop();
 
@@ -185,30 +207,56 @@ public class MonitoringService: BackgroundService
             {
                 try
                 {
-                    // Find project owner's email
-                    var project = await projectRepository.GetByIdAsync(service.ProjectId);
-                    if (project != null && !string.IsNullOrEmpty(project.OwnerId))
+                    // Use the project fetched earlier
+                    if (project != null)
                     {
-                        var owner = await userRepository.GetByIdAsync(project.OwnerId);
-                        if (owner != null && !string.IsNullOrEmpty(owner.Email) && owner.IsEmailVerified)
+                        var emailsToNotify = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                        if (!string.IsNullOrEmpty(project.OwnerId))
                         {
-                            var statusText = log.Status == 1 ? "ONLINE" : "OFFLINE";
-                            await emailService.SendAlertEmailAsync(
-                                owner.Email,
-                                service.ServiceName,
-                                service.Ip,
-                                service.Port,
-                                statusText,
-                                log.ErrorMassage ?? "N/A"
-                            );
-                            _logger.LogInformation("Alert email sent to {Email} for service [{ServiceName}] status change to {Status}",
-                                owner.Email, service.ServiceName, statusText);
+                            var owner = await userRepository.GetByIdAsync(project.OwnerId);
+                            if (owner != null && !string.IsNullOrEmpty(owner.Email) && owner.IsEmailVerified)
+                            {
+                                emailsToNotify.Add(owner.Email);
+                            }
+                        }
+
+                        if (project.NotifyEmails != null)
+                        {
+                            foreach (var email in project.NotifyEmails)
+                            {
+                                if (!string.IsNullOrWhiteSpace(email))
+                                    emailsToNotify.Add(email.Trim());
+                            }
+                        }
+
+                        var statusText = log.Status == 1 ? "ONLINE" : "OFFLINE";
+                        
+                        foreach (var email in emailsToNotify)
+                        {
+                            try 
+                            {
+                                await emailService.SendAlertEmailAsync(
+                                    email,
+                                    service.ServiceName,
+                                    service.Ip,
+                                    service.Port,
+                                    statusText,
+                                    log.ErrorMassage ?? "N/A"
+                                );
+                                _logger.LogInformation("Alert email sent to {Email} for service [{ServiceName}] status change to {Status}",
+                                    email, service.ServiceName, statusText);
+                            }
+                            catch (Exception mailEx)
+                            {
+                                _logger.LogError(mailEx, "Failed to send alert email to {Email}", email);
+                            }
                         }
                     }
                 }
                 catch (Exception emailEx)
                 {
-                    _logger.LogError(emailEx, "Failed to send alert email for service {ServiceId}", service.Id);
+                    _logger.LogError(emailEx, "Failed to process alert emails for service {ServiceId}", service.Id);
                 }
             }
         }

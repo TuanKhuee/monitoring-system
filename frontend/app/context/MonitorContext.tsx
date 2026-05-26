@@ -16,6 +16,7 @@ export interface Project {
   repositoryUrl: string;
   status: string;
   createdAt: string;
+  notifyEmails?: string[];
 }
 
 export interface Service {
@@ -33,6 +34,8 @@ export interface Service {
 export interface MonitorLog {
   id: string;
   serviceId: string;
+  serviceName: string;
+  projectName: string;
   status: number;
   responseTimeMs: number;
   statusCode: number;
@@ -125,7 +128,7 @@ export const useMonitor = () => {
 
 export const MonitorProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // API settings
-  const [apiUrl, setApiUrl] = useState("http://localhost:5053");
+  const [apiUrl, setApiUrl] = useState(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5053");
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
@@ -150,7 +153,9 @@ export const MonitorProvider: React.FC<{ children: ReactNode }> = ({ children })
     const savedToken = localStorage.getItem("monitor_token");
     const savedUser = localStorage.getItem("monitor_user");
     const savedApiUrl = localStorage.getItem("monitor_api_url");
-    if (savedApiUrl) setApiUrl(savedApiUrl);
+    if (!process.env.NEXT_PUBLIC_API_URL && savedApiUrl) {
+      setApiUrl(savedApiUrl);
+    }
     if (savedToken) {
       setToken(savedToken);
       if (savedUser) {
@@ -325,10 +330,16 @@ export const MonitorProvider: React.FC<{ children: ReactNode }> = ({ children })
     const url = isEdit ? `${apiUrl}/api/Project/${projectForm.id}` : `${apiUrl}/api/Project`;
     const method = isEdit ? "PUT" : "POST";
     try {
+      // Clean up notifyEmails before sending
+      let payload = { ...projectForm };
+      if (typeof payload.notifyEmails === 'string') {
+        payload.notifyEmails = payload.notifyEmails.split(',').map((e: string) => e.trim()).filter((e: string) => e);
+      }
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(projectForm),
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
         showToast(isEdit ? "Cập nhật dự án thành công!" : "Tạo dự án mới thành công!");
@@ -338,7 +349,7 @@ export const MonitorProvider: React.FC<{ children: ReactNode }> = ({ children })
         const data = await res.json();
         showToast(
           data.message ||
-            (isEdit ? "Không thể cập nhật dự án. Bạn có phải Admin?" : "Không thể tạo dự án. Bạn có phải Admin?"),
+          (isEdit ? "Không thể cập nhật dự án. Bạn có phải Admin?" : "Không thể tạo dự án. Bạn có phải Admin?"),
           "error"
         );
       }
@@ -462,7 +473,7 @@ export const MonitorProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [isOtpPending, setIsOtpPending] = useState(false);
 
   // UI state for project/service forms (used by modal components)
-  const [projectForm, setProjectForm] = useState({
+  const [projectForm, setProjectForm] = useState<any>({
     id: "",
     name: "",
     description: "",
@@ -470,6 +481,7 @@ export const MonitorProvider: React.FC<{ children: ReactNode }> = ({ children })
     projectUrl: "",
     repositoryUrl: "",
     status: "Active",
+    notifyEmails: "",
   });
 
   const [serviceForm, setServiceForm] = useState({

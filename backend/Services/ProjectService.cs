@@ -12,15 +12,23 @@ namespace backend.Services
     public class ProjectService : IProjectService
     {
         private readonly IProjectRepository _projectRepository;
+        private readonly IServiceRepository _serviceRepository;
 
-        public ProjectService(IProjectRepository projectRepository)
+        public ProjectService(IProjectRepository projectRepository, IServiceRepository serviceRepository)
         {
             _projectRepository = projectRepository;
+            _serviceRepository = serviceRepository;
         }
 
         public async Task<IEnumerable<ProjectResponse>> GetAllProjectsAsync()
         {
             var projects = await _projectRepository.GetAllAsync();
+            return projects.Select(MapToResponse).ToList();
+        }
+
+        public async Task<IEnumerable<ProjectResponse>> GetProjectsByOwnerIdAsync(string ownerId)
+        {
+            var projects = await _projectRepository.FilterByAsync(p => p.OwnerId == ownerId);
             return projects.Select(MapToResponse).ToList();
         }
 
@@ -41,6 +49,7 @@ namespace backend.Services
                 ProjectCode = request.ProjectCode,
                 ProjectUrl = request.ProjectUrl,
                 RepositoryUrl = request.RepositoryUrl,
+                NotifyEmails = request.NotifyEmails ?? new List<string>(),
                 OwnerId = ownerId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
@@ -62,6 +71,7 @@ namespace backend.Services
             existingProject.ProjectCode = request.ProjectCode;
             existingProject.ProjectUrl = request.ProjectUrl;
             existingProject.RepositoryUrl = request.RepositoryUrl;
+            existingProject.NotifyEmails = request.NotifyEmails ?? new List<string>();
             existingProject.UpdatedAt = DateTime.UtcNow;
 
             await _projectRepository.ReplaceOneAsync(id, existingProject);
@@ -72,6 +82,15 @@ namespace backend.Services
         {
             var existingProject = await _projectRepository.GetByIdAsync(id);
             if (existingProject == null) return false;
+
+            var services = await _serviceRepository.FilterByAsync(s => s.ProjectId == id);
+            foreach (var svc in services)
+            {
+                if (!string.IsNullOrEmpty(svc.Id))
+                {
+                    await _serviceRepository.DeleteByIdAsync(svc.Id);
+                }
+            }
 
             await _projectRepository.DeleteByIdAsync(id);
             return true;
@@ -88,6 +107,7 @@ namespace backend.Services
                 ProjectCode = project.ProjectCode,
                 ProjectUrl = project.ProjectUrl,
                 RepositoryUrl = project.RepositoryUrl,
+                NotifyEmails = project.NotifyEmails ?? new List<string>(),
                 CreatedDate = project.CreatedAt,
                 UpdatedDate = project.UpdatedAt
             };

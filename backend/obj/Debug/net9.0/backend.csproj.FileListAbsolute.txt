@@ -51,3 +51,10 @@ D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\Swashbuckle.AspNetCore.Sw
 D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\BouncyCastle.Cryptography.dll
 D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\MailKit.dll
 D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\MimeKit.dll
+D:\WorkSpace\MonitoringSystem\backend\obj\Debug\net9.0\backend.sourcelink.json
+D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\publish\web.config
+D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\publish\appsettings.Development.json
+D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\publish\appsettings.json
+D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\publish\backend.deps.json
+D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\publish\backend.runtimeconfig.json
+D:\WorkSpace\MonitoringSystem\backend\bin\Debug\net9.0\publish\backend.staticwebassets.endpoints.json

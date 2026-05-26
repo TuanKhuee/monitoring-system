@@ -52,7 +52,7 @@ export default function AuthPage() {
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-violet-600/20 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="w-full max-w-md bg-slate-900/50 border border-slate-700/50 rounded-[2rem] p-10 backdrop-blur-2xl shadow-[0_0_40px_rgba(79,70,229,0.1)] relative z-10 flex flex-col gap-8">
-        
+
         {/* Header Section */}
         <div className="flex flex-col items-center justify-center text-center gap-2">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-2">
@@ -67,8 +67,8 @@ export default function AuthPage() {
             {isOtpPending
               ? `Nhập mã OTP để kích hoạt \`${authUsername}\``
               : isLogin
-              ? "Hệ thống giám sát dịch vụ & Website"
-              : "Đăng ký tài khoản Admin/Viewer"}
+                ? "Hệ thống giám sát dịch vụ & Website"
+                : "Đăng ký tài khoản Admin/Viewer"}
           </p>
         </div>
 
@@ -91,7 +91,7 @@ export default function AuthPage() {
               className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-60 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-sm font-bold shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
             >
               {isLoading ? (
-                <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Đang xác nhận...</>
+                <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Đang xác nhận...</>
               ) : "Xác nhận mã OTP"}
             </button>
             <button
@@ -109,18 +109,16 @@ export default function AuthPage() {
               <button
                 type="button"
                 onClick={() => { setIsLogin(true); setIsOtpPending(false); }}
-                className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${
-                  isLogin ? "bg-slate-800/80 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"
-                }`}
+                className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${isLogin ? "bg-slate-800/80 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"
+                  }`}
               >
                 Đăng nhập
               </button>
               <button
                 type="button"
                 onClick={() => { setIsLogin(false); setIsOtpPending(false); }}
-                className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${
-                  !isLogin ? "bg-slate-800/80 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"
-                }`}
+                className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${!isLogin ? "bg-slate-800/80 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"
+                  }`}
               >
                 Đăng ký
               </button>
@@ -173,7 +171,7 @@ export default function AuthPage() {
                 className="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-60 disabled:cursor-not-allowed text-white py-4 rounded-2xl text-sm font-bold shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
               >
                 {isLoading ? (
-                  <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Đang xử lý...</>
+                  <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg> Đang xử lý...</>
                 ) : (isLogin ? "Truy cập hệ thống" : "Tạo tài khoản mới")}
               </button>
 

@@ -21,7 +21,24 @@ public class ProjectController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllAsync()
     {
-        var projects = await _projectService.GetAllProjectsAsync();
+        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        IEnumerable<ProjectResponse> projects;
+
+        if (role == "Admin")
+        {
+            projects = await _projectService.GetAllProjectsAsync();
+        }
+        else
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { message = "User is unauthorized" });
+            }
+            projects = await _projectService.GetProjectsByOwnerIdAsync(userId);
+        }
+
         return Ok(projects);
     }
 
@@ -36,7 +53,6 @@ public class ProjectController : ControllerBase
         return Ok(project);
     }
 
-    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromBody] CreateProjectRequest request)
     {
@@ -50,10 +66,25 @@ public class ProjectController : ControllerBase
         return CreatedAtAction("GetById", new { id = createdProject.Id }, createdProject);
     }
     
-    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAsync(string id, [FromBody] UpdateProjectRequest request)
     {
+        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (role != "Admin")
+        {
+            if (string.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is unauthorized" });
+            var project = await _projectService.GetByIdAsync(id);
+            if (project == null) return NotFound(new { message = "Project not found to update" });
+            
+            var userProjects = await _projectService.GetProjectsByOwnerIdAsync(userId);
+            if (!userProjects.Any(p => p.Id == id))
+            {
+                return StatusCode(403, new { message = "Bạn không có quyền cập nhật Dự án này." });
+            }
+        }
+
         var success = await _projectService.UpdateProjectAsync(id, request);
         if (!success)
         {
@@ -62,10 +93,22 @@ public class ProjectController : ControllerBase
         return Ok(new { message = "Project updated successfully" });
     }
 
-    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAsync(string id)
     {
+        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (role != "Admin")
+        {
+            if (string.IsNullOrEmpty(userId)) return Unauthorized(new { message = "User is unauthorized" });
+            var userProjects = await _projectService.GetProjectsByOwnerIdAsync(userId);
+            if (!userProjects.Any(p => p.Id == id))
+            {
+                return StatusCode(403, new { message = "Bạn không có quyền xóa Dự án này." });
+            }
+        }
+
         var success = await _projectService.DeleteProjectAsync(id);
         if (!success)
         {

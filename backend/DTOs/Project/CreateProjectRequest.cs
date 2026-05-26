@@ -8,6 +8,7 @@ public class CreateProjectRequest
     public string ProjectCode { get; set; }
     public string ProjectUrl { get; set; }
     public string RepositoryUrl {get;set;}
+    public List<string> NotifyEmails { get; set; } = new();
     public DateTime CreatedDate { get; set; }
     public DateTime UpdatedDate { get; set; }
 }
