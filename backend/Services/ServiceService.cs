@@ -77,6 +77,7 @@ public class ServiceService : IServiceService
         return new ServiceResponse
         {
             Id = service.Id ?? string.Empty,
+            ProjectId = service.ProjectId,
             ServiceName = service.ServiceName,
             Ip = service.Ip,
             Port = service.Port,

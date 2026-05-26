@@ -10,6 +10,8 @@ public class MonitorLog
     public string? Id {get; set;}
     [BsonRepresentation(BsonType.ObjectId)]
     public string ServiceId {get; set;} = string.Empty;
+    public string ServiceName { get; set; } = string.Empty;
+    public string ProjectName { get; set; } = string.Empty;
     public int Status {get; set;}
     public long ResponseTimeMs {get; set;}
     public int? StatusCode {get;set;}

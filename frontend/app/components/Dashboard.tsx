@@ -147,11 +147,18 @@ export default function Dashboard() {
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${isOnline ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" : "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse"}`} />
-                        <span className="text-[11px] font-bold text-slate-200 truncate max-w-[120px]" title={log.serviceId}>
-                          {log.serviceId.substring(log.serviceId.length - 8)}
-                        </span>
+                      <div className="flex flex-col gap-0.5 max-w-[150px]">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${isOnline ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" : "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse"}`} />
+                          <span className="text-[11px] font-bold text-slate-200 truncate" title={log.serviceName || log.serviceId}>
+                            {log.serviceName || log.serviceId.substring(log.serviceId.length - 8)}
+                          </span>
+                        </div>
+                        {log.projectName && (
+                          <span className="text-[9px] text-slate-400 truncate ml-4" title={log.projectName}>
+                            {log.projectName}
+                          </span>
+                        )}
                       </div>
                       <span className={`text-[9px] px-2 py-0.5 rounded-md font-bold uppercase ${isOnline ? "bg-emerald-950/50 text-emerald-400" : "bg-rose-950/50 text-rose-400"}`}>
                         {isOnline ? "Online" : "Offline"}

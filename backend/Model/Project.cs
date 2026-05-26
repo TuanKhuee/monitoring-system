@@ -16,6 +16,7 @@ public class Project
     public string Status { get; set;}
     public string OwnerId { get; set;}
     public List<string> Members { get; set;}
+    public List<string> NotifyEmails { get; set; } = new();
     public string ProjectCode { get; set;}
     public string ProjectUrl { get; set;}
     public string RepositoryUrl { get; set;}

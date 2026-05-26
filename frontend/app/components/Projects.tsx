@@ -27,6 +27,7 @@ export default function Projects() {
       projectUrl: "",
       repositoryUrl: "",
       status: "Active",
+      notifyEmails: "",
     });
     setShowModal(true);
   };
@@ -41,6 +42,7 @@ export default function Projects() {
       projectUrl: proj.projectUrl,
       repositoryUrl: proj.repositoryUrl,
       status: proj.status,
+      notifyEmails: proj.notifyEmails ? proj.notifyEmails.join(", ") : "",
     });
     setShowModal(true);
   };
@@ -155,6 +157,17 @@ export default function Projects() {
                     placeholder="https://github.com/org/repo"
                     value={projectForm.repositoryUrl}
                     onChange={(e) => setProjectForm({ ...projectForm, repositoryUrl: e.target.value })}
+                    className="bg-slate-950/50 border border-slate-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm placeholder:text-slate-600"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5 md:col-span-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Danh sách Email nhận cảnh báo (Cách nhau bởi dấu phẩy)</label>
+                  <input
+                    type="text"
+                    placeholder="VD: email1@example.com, email2@example.com"
+                    value={projectForm.notifyEmails}
+                    onChange={(e) => setProjectForm({ ...projectForm, notifyEmails: e.target.value })}
                     className="bg-slate-950/50 border border-slate-700/50 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm placeholder:text-slate-600"
                   />
                 </div>
