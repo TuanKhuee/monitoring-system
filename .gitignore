@@ -3,3 +3,4 @@ obj/
 publish/
 .env*
 !.env.example
+appsettings.Local.json

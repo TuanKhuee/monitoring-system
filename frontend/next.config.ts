@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Allow fetching resources from the local IP address
+  allowedDevOrigins: ['192.168.0.240'],
 };
 
 export default nextConfig;
