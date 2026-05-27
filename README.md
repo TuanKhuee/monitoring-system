@@ -108,6 +108,9 @@ Mở file `appsettings.json` trong thư mục `backend/` và cập nhật thông
    ```bash
    dotnet watch run
    ```
+   dotnet publish -c Release -o ./publish
+   dotnet ./publish/backend.dll --urls="http://0.0.0.0:5000
+
 4. Khi terminal in ra cổng Port thành công, bạn có thể truy cập giao diện Swagger UI thử nghiệm tại:
    - **Swagger Link**: `http://localhost:5000/swagger/index.html` hoặc `https://localhost:5001/swagger/index.html`
 
